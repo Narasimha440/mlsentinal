@@ -18,6 +18,8 @@ MLSentinel is a Python SDK for monitoring, validating, and analyzing Machine Lea
 - Lightweight and easy to integrate
 
 ---
+## Reference
+Check out the [PyPi Readme](https://pypi.org/project/mlsentinel/0.1.0.dev1/) for verification!1
 
 ## Installation
 
