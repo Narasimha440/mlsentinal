@@ -30,7 +30,7 @@ Check out the [PyPi Readme](https://pypi.org/project/mlsentinel/0.1.0.dev1/) for
 ## Installation
 
 ```bash
-pip install mlsentinel==0.1.0.dev1
+pip install mlsentinel
 ```
 
 ---
