@@ -22,7 +22,7 @@ MLSentinel is a Python SDK for monitoring, validating, and analyzing Machine Lea
 ## Installation
 
 ```bash
-pip install mlsentinel
+pip install mlsentinel==0.1.0.dev1
 ```
 
 ---
