@@ -1,3 +1,5 @@
+![LOGO](Gemini_Generated_Image_86ia4b86ia4b86ia.png)
+
 # MLSentinel
 
 [![PyPI version](https://img.shields.io/pypi/v/mlsentinel.svg)](https://pypi.org/project/mlsentinel/)
