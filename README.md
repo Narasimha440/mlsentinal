@@ -1,4 +1,4 @@
-![LOGO](logo.png)
+![LOGO](https://raw.githubusercontent.com/Narasimha440/mlsentinal/refs/heads/main/logo.png)
 
 # MLSentinel
 
