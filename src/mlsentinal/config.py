@@ -2,7 +2,7 @@
 Configuration values used throughout the SDK
 """
 
-BASE_URL = "http://localhost:8080/api"
+BASE_URL = "http://127.0.0.1:8000"
 
 REQUEST_TIMEOUT = 30
 

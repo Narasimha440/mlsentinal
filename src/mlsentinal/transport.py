@@ -1,7 +1,7 @@
 """
 Handles communication with the MLSentinal Backend
 """
-
+print(">>> NEW TRANSPORT.PY IS LOADED <<<")
 import requests
 
 
@@ -26,7 +26,7 @@ class Transport:
 
         headers = DEFAULT_HEADERS.copy()
 
-        headers["Authorization"] = f"Bearer {self.api_key}"
+        headers["X-API-Key"] = self.api_key
 
         payload = {
             "project": report.project,
@@ -34,5 +34,13 @@ class Transport:
             "metrics": report.metrics
         }
 
-        print("Headers: ", headers)
-        print("Payload: ", payload)
+        response = requests.post(
+            f"{BASE_URL}/api/report",
+            headers=headers,
+            json=payload,
+            timeout=REQUEST_TIMEOUT
+        )
+
+        response.raise_for_status()
+
+        return response.json()
