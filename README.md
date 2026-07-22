@@ -1,55 +1,36 @@
-![LOGO](https://raw.githubusercontent.com/Narasimha440/mlsentinal/refs/heads/main/logo.png)
+![MLSentinel logo](https://raw.githubusercontent.com/Narasimha440/mlsentinal/main/logo.png)
 
 # MLSentinel
 
-[![PyPI version](https://img.shields.io/pypi/v/mlsentinel.svg)](https://pypi.org/project/mlsentinel/)
+[![PyPI](https://img.shields.io/pypi/v/mlsentinel.svg)](https://pypi.org/project/mlsentinel/)
 [![Python](https://img.shields.io/pypi/pyversions/mlsentinel.svg)](https://pypi.org/project/mlsentinel/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 
-MLSentinel is a Python SDK that enables Machine Learning developers to validate and submit model evaluation reports to the MLSentinel platform. The SDK performs local validation before securely sending reports to the backend using API key authentication.
+**Validate and submit machine-learning evaluation metrics from Python.**
 
-> 🚧 **Developer Preview**
+MLSentinel is a lightweight Python SDK for sending model evaluation reports to the MLSentinel platform. It validates report data locally, authenticates requests with your API key, and returns the platform response as JSON.
+
+> **Developer preview — v0.1.3.dev3**
 >
-> MLSentinel is currently under active development. This release provides the SDK foundation, including input validation, backend communication, API key authentication, and custom exceptions. AI-powered model analysis and dashboard features will be introduced in future releases.
+> This pre-release focuses on reliable report submission: local validation, HTTP transport, API-key authentication, and actionable SDK errors. Analysis and dashboard features are planned for later releases.
 
----
+## Installation
 
-# 🎉 What's New in v0.1.3.dev2
-
-- ✅ Added HTTP transport layer
-- ✅ Connected SDK with MLSentinel backend
-- ✅ Added API Key authentication (`X-API-Key`)
-- ✅ Added request timeout handling
-- ✅ Added custom SDK exceptions
-- ✅ Improved input validation
-- ✅ Improved SDK architecture
-- ✅ Various bug fixes and code improvements
-
----
-
-# Features
-
-- 🚀 Simple `MLDoc` client
-- 📊 Submit machine learning model reports
-- ✅ Automatic validation of projects, models, and metrics
-- 🔐 Secure API Key authentication
-- 🌐 HTTP transport layer
-- ⚡ Lightweight with minimal dependencies
-- 🛡️ Custom SDK exceptions
-- 📦 Typed report models
-- 🔄 SDK version tracking
-
----
-
-# Installation
+MLSentinel supports Python 3.9 and later.
 
 ```bash
-pip install mlsentinal
+pip install mlsentinel
 ```
 
----
+For this development build, install from a local checkout:
 
-# Quick Start
+```bash
+pip install .
+```
+
+## Quick start
+
+Create an API key in the MLSentinel platform, then submit a report:
 
 ```python
 from mlsentinal import MLDoc
@@ -64,165 +45,125 @@ response = client.doc_report(
         "precision": 0.94,
         "recall": 0.93,
         "f1_score": 0.935,
-        "val_loss": 0.18
-    }
+        "roc_auc": 0.98,
+        "val_loss": 0.18,
+    },
 )
 
 print(response)
-print("SDK Version:", client.version())
+print(client.version())  # 0.1.3.dev3
 ```
 
----
+Keep API keys out of source control. In production, load the key from your secret manager or environment rather than embedding it in code.
 
-# Validation Rules
+## What happens when you submit a report
 
-Before submitting a report, MLSentinel validates all inputs locally.
-
-| Field | Validation |
-|--------|------------|
-| Project Name | Required |
-| Model Name | Required |
-| Accuracy | Between 0.0 and 1.0 |
-| Precision | Between 0.0 and 1.0 |
-| Recall | Between 0.0 and 1.0 |
-| F1 Score | Between 0.0 and 1.0 |
-| Validation Loss | Greater than or equal to 0 |
-
-If validation fails, an exception is raised before any request is sent to the backend.
-
----
-
-# SDK Architecture
-
-```
-Developer
+```text
+Your application
       │
       ▼
-  MLDoc Client
+MLDoc.doc_report(...)
       │
-      ▼
- Validation Engine
+      ├─ Local input validation
       │
-      ▼
-  Report Model
-      │
-      ▼
- HTTP Transport
-      │
-      ▼
- API Authentication
-      │
-      ▼
- MLSentinel Backend
+      └─ HTTP request with X-API-Key
+                    │
+                    ▼
+            MLSentinel API
+                    │
+                    ▼
+            JSON response or SDK exception
 ```
 
----
+## Supported metrics and validation
 
-# Project Structure
+All reports require a non-empty string for both `project` and `model`. The `metrics` argument must be a non-empty dictionary containing only the supported metrics below.
 
+| Metric | Accepted value |
+| --- | --- |
+| `accuracy` | Number from `0` to `1` |
+| `precision` | Number from `0` to `1` |
+| `recall` | Number from `0` to `1` |
+| `f1_score` | Number from `0` to `1` |
+| `roc_auc` | Number from `0` to `1` |
+| `val_loss` | Number greater than or equal to `0` |
+
+Validation occurs before a network request is made, helping you catch malformed reports early.
+
+## Error handling
+
+MLSentinel raises SDK-specific exceptions with stable error codes. Catch the common base class when you want one error path for validation, authentication, network, and server failures.
+
+```python
+from mlsentinal import MLDoc
+from mlsentinal.exceptions import MLSentinalError
+
+client = MLDoc("YOUR_API_KEY")
+
+try:
+    client.doc_report(
+        project="Spam Detector",
+        model="Random Forest",
+        metrics={"accuracy": 1.2},
+    )
+except MLSentinalError as error:
+    print(error.code)     # for example: MLS026
+    print(error.message)  # accuracy must be between 0 and 1.
 ```
-src/
-└── mlsentinal/
-    ├── __init__.py
-    ├── client.py
-    ├── config.py
-    ├── exceptions.py
-    ├── models.py
-    ├── transport.py
-    ├── validators.py
-    └── version.py
-```
 
----
+| Category | Exception |
+| --- | --- |
+| Invalid project, model, or metrics | `ProjectValidationError`, `ModelValidationError`, `MetricValidationError` |
+| Invalid API key | `InvalidAPIKeyError` |
+| Authentication or authorization failure | `AuthenticationError` |
+| Timeout, connection, or request error | `MLSentinalConnectionError` |
+| Unexpected API response or server error | `MLSentinalServerError` |
 
-# Requirements
+## Version 0.1.3.dev3
+
+This development release adds and improves:
+
+- Standardized SDK error codes for validation, network, authentication, and server failures.
+- Clearer exception messages for unsupported and invalid metric values.
+- HTTP report transport with API-key authentication through the `X-API-Key` header.
+- Timeout and connection-error handling.
+- Local validation of projects, models, and supported evaluation metrics.
+
+## API reference
+
+### `MLDoc(api_key)`
+
+Creates a client authenticated with the supplied API key.
+
+### `client.doc_report(project, model, metrics)`
+
+Validates and submits a model report. On success, it returns the JSON body returned by the MLSentinel API. On failure, it raises an `MLSentinalError` subclass.
+
+### `client.version()`
+
+Returns the installed SDK version.
+
+## Requirements
 
 - Python 3.9+
-- requests
+- `requests` 2.31.0+
 
----
+## Roadmap
 
-# Roadmap
+- AI-assisted model analysis and health reports
+- Performance recommendations and diagnostics
+- Dashboard and report history
+- Model monitoring and drift detection
+- CI/CD integrations
 
-## ✅ Version 0.1.x (Current)
+## Contributing
 
-- SDK Foundation
-- MLDoc Client
-- Report Models
-- Input Validation
-- HTTP Transport Layer
-- API Key Authentication
-- Backend Integration
-- Custom SDK Exceptions
+Contributions are welcome. Please open an issue to discuss significant changes, then submit a focused pull request with tests or examples where appropriate.
 
----
+## License
 
-## 🚧 Version 0.1.3
+MLSentinel is distributed under the [MIT License](LICENSE).
 
-- Standardized SDK Error Codes
-- Cleaner Developer Error Messages
-- Enhanced Exception Handling
-- Better Response Formatting
-- Improved Documentation
+## Author
 
----
-
-## 🚧 Version 0.2.0
-
-- AI Analysis Engine
-- Model Health Reports
-- Performance Recommendations
-- Intelligent Diagnostics
-- Report Analysis API
-
----
-
-## 🚀 Future Releases
-
-- Web Dashboard
-- Team Workspaces
-- Project Management
-- Model Monitoring
-- Drift Detection
-- Report History
-- Model Comparison
-- REST API Expansion
-- CI/CD Integrations
-
----
-
-# Contributing
-
-Contributions are welcome!
-
-If you'd like to contribute:
-
-1. Fork the repository.
-2. Create a feature branch.
-3. Commit your changes.
-4. Push your branch.
-5. Open a Pull Request.
-
----
-
-# Vision
-
-Machine Learning developers often know **what** their evaluation metrics are, but not **why** model performance changed or what should be improved.
-
-MLSentinel aims to bridge that gap by providing intelligent analysis, actionable recommendations, and model health insights, helping developers build more reliable machine learning systems.
-
-The current SDK is the foundation for that vision, focusing on secure report submission and validation.
-
----
-
-# Author
-
-**Adari Narasimha Dhoni**
-
-GitHub: https://github.com/Narasimha440
-
----
-
-# License
-
-This project is licensed under the MIT License.
+Created by [Adari Narasimha Dhoni](https://github.com/Narasimha440).

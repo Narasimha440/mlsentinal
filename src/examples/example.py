@@ -1,21 +1,25 @@
-import mlsentinal
-print(mlsentinal.__file__)
-
 from mlsentinal import MLDoc
+from mlsentinal.exceptions import MLSentinalError
 
-doctor = MLDoc("narasimha_9963111874")
+monitor = MLDoc("narasimha_9963111874")
 
-response = doctor.doc_report(
-    project="Spam detector",
-    model="Random forest",
-    metrics={
-        "accuracy": 0.95,
-        "precision": 0.94,
-        "recall": 0.93,
-        "f1_score": 0.935,
-        "val_loss": 0.18
-    }
-)
-print(response)
+try:
 
-print("SDK version:", doctor.version())
+
+    response = monitor.doc_report(
+        project="MLSentinal",
+        model="ResNet50",
+        metrics={
+            "accuracy": 0.95,
+            "precision": 0.94,
+            "recall": 0.93,
+            "f1_score": 0.94,
+            "roc_auc": 0.98,
+            "val_loss": 0.18,
+        },
+    )
+
+    print(response)
+
+except MLSentinalError as e:
+    print(f"{e}")

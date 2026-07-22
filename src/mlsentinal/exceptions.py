@@ -6,51 +6,58 @@ class MLSentinalError(Exception):
     """
     Base exception
     """
-    pass
+    def __init__(self, code: str, message: str):
+        self.code = code
+        self.message = message
+        super().__init__(f"[{code}] {message}")
 
-class InvalidAPIKeyError(Exception):
+    def __str__(self):
+        return f"[{self.code}] {self.message}"
+    
+    
+class InvalidAPIKeyError(MLSentinalError):
     """
     Raised when entered API key was wrong
     """
 
     pass
 
-class AuthenticationError(Exception):
+class AuthenticationError(MLSentinalError):
     """
     When Authentication failes
     """
 
     pass
 
-class MetricValidationError(Exception):
+class MetricValidationError(MLSentinalError):
     """
     Raised one or more metrics
     """
 
     pass
 
-class ProjectValidationError(Exception):
+class ProjectValidationError(MLSentinalError):
     """
     When project name is invalid
     """
 
     pass
 
-class ModelValidationError(Exception):
+class ModelValidationError(MLSentinalError):
     """
     When invalid model name
     """
 
     pass
 
-class MLSentinalConnectionError(Exception):
+class MLSentinalConnectionError(MLSentinalError):
     """
     When SDK could not connect the MLSentinal servers
     """
 
     pass
 
-class MLSentinalServerError(Exception):
+class MLSentinalServerError(MLSentinalError):
     """
     When server returns error
     """
